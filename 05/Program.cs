@@ -27,15 +27,12 @@ for (int i = 1; i < sortedSeats.Length - 1; i++) {
     }
 }
 
-static Seat Parse(string line) => new(Row(line), Column(line));
-static int Row(string line) => FromBinaryString(input: line.Substring(0, 7), one: 'B', zero: 'F');
-static int Column(string line) => FromBinaryString(input: line.Substring(7, 3), one: 'R', zero: 'L');
-
-static int FromBinaryString(string input, char one, char zero) {
-    var bin = input.Replace(one, '1').Replace(zero, '0');
-    return Convert.ToInt32(bin, fromBase: 2);
+static Seat Parse(string line) {
+    var bin = line.Replace('B', '1').Replace('F', '0').Replace('R', '1').Replace('L', '0');
+    return new(Convert.ToInt32(bin, fromBase: 2));
 }
 
-record Seat(int Row, int Column) {
-    public int Id => Row * 8 + Column;
+record Seat(int Id) {
+    public int Row => Id >> 3;
+    public int Column => Id & 7;
 }
