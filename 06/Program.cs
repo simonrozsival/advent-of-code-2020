@@ -4,49 +4,27 @@ using System.Linq;
 using System.Collections.Generic;
 
 var inputFile = new StreamReader("./in.txt");
-var input = inputFile.ReadToEnd().Split("\n").ToList();
+var input = inputFile.ReadToEnd()
+  .Split("\n\n", StringSplitOptions.RemoveEmptyEntries)
+  .Select(group => group.Split("\n", StringSplitOptions.RemoveEmptyEntries))
+  .ToArray();
 
 Console.WriteLine($"Puzzle 1: {solvePuzzle1(input)}");
 Console.WriteLine($"Puzzle 2: {solvePuzzle2(input)}");
 
-// --- Puzzle 1
+int solvePuzzle1(IEnumerable<string[]> groups)
+  => groups.Select(union).Sum(union => union.Count);
 
-int solvePuzzle1(List<string> input) {
-  int total = 0;
-  var currentGroup = new SortedSet<char>();
-  input.Add(""); // extra empty line to flush the last group
+int solvePuzzle2(IEnumerable<string[]> groups)
+  => groups.Select(intersect).Sum(intersection => intersection.Length);
 
-  foreach (var line in input) {
-    if (line == "") {
-      total += currentGroup.Count;
-      currentGroup.Clear();
-    } else {
-      foreach (var c in line.ToCharArray()) currentGroup.Add(c);
-    }
-  }
+HashSet<char> union(string[] group)
+  => group.Aggregate(seed: new HashSet<char>(), unionTwo);
 
-  return total;
-}
+HashSet<char> unionTwo(HashSet<char> acc, string next)
+  => acc.Union(next.ToCharArray()).ToHashSet();
 
-// --- Puzzle 2
+char[] intersect(string[] group) =>
+  group.Aggregate(seed: group[0].ToCharArray(), intersectTwo);
 
-int solvePuzzle2(List<string> input) {
-  int total = 0;
-  List<char> currentGroup = null;
-  input.Add(""); // extra empty line to flush the last group
-
-  foreach (var line in input) {
-    if (line == "") {
-      total += currentGroup?.Count ?? 0;
-      currentGroup = null;
-    } else {    
-      if (currentGroup == null) {
-        currentGroup = new List<char>(line.ToCharArray());
-      } else {
-        currentGroup = currentGroup.Where(c => line.Contains(c)).ToList();
-      }
-    }
-  }
-
-  return total;
-}
+char[] intersectTwo(char[] acc, string next) => acc.Where(c => next.Contains(c)).ToArray();
