@@ -24,7 +24,8 @@ HashSet<char> union(string[] group)
 HashSet<char> unionTwo(HashSet<char> acc, string next)
   => acc.Union(next.ToCharArray()).ToHashSet();
 
-char[] intersect(string[] group) =>
-  group.Aggregate(seed: group[0].ToCharArray(), intersectTwo);
+char[] intersect(string[] group)
+  => group.Aggregate(seed: group[0].ToCharArray(), intersectTwo);
 
-char[] intersectTwo(char[] acc, string next) => acc.Where(c => next.Contains(c)).ToArray();
+char[] intersectTwo(char[] acc, string next)
+  => acc.Where(c => next.Contains(c)).ToArray();
