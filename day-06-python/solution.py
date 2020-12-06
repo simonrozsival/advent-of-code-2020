@@ -1,13 +1,12 @@
 from functools import reduce
 
-with open("./in.txt") as f:
-    groups = [[l for l in g.split("\n") if l != ""] for g in f.read().split("\n\n")]
+with open("../day-06-csharp/in.txt") as f:
+    grouped_lines = f.read().split("\n\n")
+    grouped_words = [g.replace("\n", " ") for g in grouped_lines]
+    groups = [[set(w) for w in g.split()] for g in grouped_words]
 
-def solve_puzzle_1():
-    return sum(len({c for c in " ".join(g) if c != " "}) for g in groups)
+solution1 = sum(len(set.union(*g)) for g in groups)
+print(f"Puzzle 1: {solution1}")
 
-def solve_puzzle_2():
-    return sum(len(reduce(lambda acc, l: {c for c in l if c in acc}, g)) for g in groups)
-
-print(solve_puzzle_1())
-print(solve_puzzle_2())
+solution2 = sum(len(set.intersection(*g)) for g in groups)
+print(f"Puzzle 2: {solution2}")
