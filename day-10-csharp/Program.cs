@@ -1,51 +1,42 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Collections.Generic;
 
 var inputFile = new StreamReader("./in.txt");
 var adapters =
     inputFile.ReadToEnd()
         .Split("\n", StringSplitOptions.RemoveEmptyEntries)
         .Select(long.Parse)
-        .OrderBy(a => a)
+        .OrderBy(joltage => joltage)
+        .Prepend(0)
         .ToArray();
 
-var margin = 3;
-var targetJoltage = adapters.Max() + margin;
+var targetJoltage = adapters.Max() + 3;
 
-// Puzzle 1
+Console.WriteLine($"Puzzle 1: {solvePuzzle1()}");
+Console.WriteLine($"Puzzle 2: {solvePuzzle2UsingDynamicProgramming()}");
 
-var current = 0L;
-var oneJolts = 0L;
-var threeJolts = 0L;
+Func<(long, long), bool> differBy(long n)
+    => p => p.Item2 - p.Item1 == n;
 
-while (targetJoltage - current > margin) {
-    var next = adapters.Where(r => r > current).Where(r => r - current <= margin).Min();
-    if (next - current == 1) oneJolts++;
-    else if (next - current == 3) threeJolts++;
-    current = next;
+long solvePuzzle1() {
+    var pairs = adapters.Zip(adapters.Skip(1));
+    var differBy1 = pairs.Where(differBy(1)).Count();
+    var differBy3 = pairs.Where(differBy(3)).Count() + 1;
+
+    return differBy1 * differBy3;
 }
 
-if (targetJoltage - current == 1) oneJolts++;
-else if (targetJoltage - current == 3) threeJolts++;
+long solvePuzzle2UsingDynamicProgramming() {
+    var posibilitiesForAdapter = new long[targetJoltage + 1];
+    posibilitiesForAdapter[targetJoltage] = 1;
+    foreach (var i in adapters.Reverse()) {
+        posibilitiesForAdapter[i] =
+            posibilitiesForAdapter[i + 1]
+            + posibilitiesForAdapter[i + 2]
+            + posibilitiesForAdapter[i + 3];
+    }
 
-var puzzle1 = oneJolts * threeJolts;
-Console.WriteLine($"Puzzle 1: {puzzle1}");
-
-// Puzzle 2
-
-var cache = new long[adapters.Max()];
-
-long NumberOfPossibleAdapterArrangements(long from) {
-    if (from < cache.Length && cache[from] > 0) return cache[from];
-    if (targetJoltage - from <= margin) return 1;
-
-    var nextCandidates = adapters.Where(r => r > from).Where(r => r - from <= margin);
-    var result = nextCandidates.Select(NumberOfPossibleAdapterArrangements).Sum();
-
-    cache[from] = result;
-    return result;
+    return posibilitiesForAdapter[0];
 }
-
-var puzzle2 = NumberOfPossibleAdapterArrangements(from: 0);
-Console.WriteLine($"Puzzle 2: {puzzle2}");
